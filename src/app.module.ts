@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ClubModule } from './club/club.module';
 import { databaseConfig } from './config/database.config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -14,16 +15,19 @@ import { CustomThrottlerGuard } from './common/guards/throttle.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60,
-        limit: 1000,
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 1000,
+        },
+      ],
+    }),
     TypeOrmModule.forRoot(databaseConfig),
     AuthModule,
+    ClubModule,
   ],
   controllers: [AppController],
   providers: [

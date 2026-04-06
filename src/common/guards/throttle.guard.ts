@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger, ExecutionContext } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { Request } from 'express';
 
@@ -7,7 +7,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   private logger = new Logger('CustomThrottlerGuard');
 
   protected async getTracker(req: Record<string, any>): Promise<string> {
-    const ip = (req as any).ip || (req as any).socket?.remoteAddress || 'unknown';
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
     this.logger.debug(`Tracking IP: ${ip}`);
     return ip;
   }
