@@ -3,12 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ClubModule } from './club/club.module';
 import { ClubMemberModule } from './club-member/club-member.module';
 import { EventTypeModule } from './event-type/event-type.module';
+import { EventModule } from './event/event.module';
 import { databaseConfig } from './config/database.config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -19,6 +21,7 @@ import { CustomThrottlerGuard } from './common/guards/throttle.guard';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -32,6 +35,7 @@ import { CustomThrottlerGuard } from './common/guards/throttle.guard';
     ClubModule,
     ClubMemberModule,
     EventTypeModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [
