@@ -48,7 +48,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { limit: 3, ttl: 300000 } })
+  @Throttle({ default: { limit: 20, ttl: 300000 } })
   @ApiOperation({ summary: 'Đăng nhập' })
   @ApiResponse({ status: 200, description: 'Đăng nhập thành công', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Thông tin đăng nhập không hợp lệ' })

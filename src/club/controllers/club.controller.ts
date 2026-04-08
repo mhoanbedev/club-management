@@ -2,6 +2,7 @@ import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Request, 
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ClubService } from '../services/club.service';
+import { ClubMemberService } from '../../club-member/services/club-member.service';
 import { CreateClubDto } from '../dto/create-club.dto';
 import { UpdateClubDto } from '../dto/update-club.dto';
 import { ApproveClubDto } from '../dto/approve-club.dto';
@@ -13,7 +14,10 @@ import { ClubLeaderGuard } from '../guards/club-leader.guard';
 @ApiTags('Clubs')
 @Controller('clubs')
 export class ClubController {
-  constructor(private clubService: ClubService) {}
+  constructor(
+    private clubService: ClubService,
+    private clubMemberService: ClubMemberService,
+  ) {}
 
   @Post()
   @SkipThrottle()
@@ -118,6 +122,12 @@ export class ClubController {
     @Param('id') id: string,
     @Body() approveClubDto: ApproveClubDto,
   ): Promise<ClubResponseDto> {
-    return this.clubService.approveClub(id, approveClubDto);
+    const approvedClub = await this.clubService.approveClub(id, approveClubDto);
+    
+    if (approveClubDto.status === 'active' && this.clubMemberService) {
+      await this.clubMemberService.autoAddLeaderWhenClubApproved(id, approvedClub.leaderId);
+    }
+    
+    return approvedClub;
   }
 }
