@@ -6,13 +6,16 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
   app.enableCors();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      skipMissingProperties: false,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
 
-  // Enable validation
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-
-  // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Club Management System')
     .setDescription('API for managing clubs, events, and member points')
