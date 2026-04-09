@@ -11,6 +11,7 @@ import { ClubModule } from './club/club.module';
 import { ClubMemberModule } from './club-member/club-member.module';
 import { EventTypeModule } from './event-type/event-type.module';
 import { EventModule } from './event/event.module';
+import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { databaseConfig } from './config/database.config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -36,6 +37,7 @@ import { CustomThrottlerGuard } from './common/guards/throttle.guard';
     ClubMemberModule,
     EventTypeModule,
     EventModule,
+    EventRegistrationModule,
   ],
   controllers: [AppController],
   providers: [
