@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { EventAttendanceEntity } from '../entities/event-attendance.entity';
@@ -13,6 +13,7 @@ import { EventRepository } from '../event/repositories/event.repository';
 import { ClubMemberRepository } from '../club-member/repositories/club-member.repository';
 import { EventRegistrationRepository } from '../event-registration/repositories/event-registration.repository';
 import { UserRepository } from '../auth/repositories/user.repository';
+import { MemberPointModule } from '../member-point/member-point.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserRepository } from '../auth/repositories/user.repository';
       EventRegistrationEntity,
     ]),
     JwtModule,
+    forwardRef(() => MemberPointModule),
   ],
   controllers: [EventAttendanceController],
   providers: [
@@ -34,5 +36,6 @@ import { UserRepository } from '../auth/repositories/user.repository';
     EventRegistrationRepository,
     UserRepository,
   ],
+  exports: [EventAttendanceRepository],
 })
 export class EventAttendanceModule {}

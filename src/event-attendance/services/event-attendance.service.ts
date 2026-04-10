@@ -4,6 +4,7 @@ import { EventRepository } from '../../event/repositories/event.repository';
 import { ClubMemberRepository } from '../../club-member/repositories/club-member.repository';
 import { EventRegistrationRepository } from '../../event-registration/repositories/event-registration.repository';
 import { UserRepository } from '../../auth/repositories/user.repository';
+import { MemberPointService } from '../../member-point/services/member-point.service';
 import { AttendanceResponseDto, AttendanceListResponseDto } from '../dto/attendance-response.dto';
 import { GenerateQrResponseDto } from '../dto/generate-qr.dto';
 import * as crypto from 'crypto';
@@ -21,6 +22,7 @@ export class EventAttendanceService {
     private eventRepository: EventRepository,
     private clubMemberRepository: ClubMemberRepository,
     private registrationRepository: EventRegistrationRepository,
+    private memberPointService: MemberPointService,
   ) {}
 
   async generateQrCode(clubId: string, eventId: string, userId: string): Promise<GenerateQrResponseDto> {
@@ -128,6 +130,13 @@ export class EventAttendanceService {
 
     await this.attendanceRepository.save(attendance);
     const savedAttendance = await this.attendanceRepository.findByEventAndUser(eventId, userId);
+    
+    try {
+      await this.memberPointService.addPointsForCheckIn(clubId, userId, eventId, roleAtEvent);
+    } catch (error) {
+      console.error('Lỗi tính điểm', error);
+    }
+    
     return this.formatAttendanceResponse(savedAttendance);
   }
 
@@ -181,6 +190,12 @@ export class EventAttendanceService {
     await this.attendanceRepository.save(attendance);
     
     const savedAttendance = await this.attendanceRepository.findByEventAndUser(eventId, targetUserId);
+    try {
+      await this.memberPointService.addPointsForCheckIn(clubId, targetUserId, eventId, roleAtEvent);
+    } catch (error) {
+      console.error('Lỗi tính điểm:', error);
+    }
+    
     return this.formatAttendanceResponse(savedAttendance);
   }
 

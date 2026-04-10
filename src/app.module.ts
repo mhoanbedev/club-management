@@ -13,6 +13,7 @@ import { EventTypeModule } from './event-type/event-type.module';
 import { EventModule } from './event/event.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { EventAttendanceModule } from './event-attendance/event-attendance.module';
+import { MemberPointModule } from './member-point/member-point.module';
 import { databaseConfig } from './config/database.config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -40,6 +41,7 @@ import { CustomThrottlerGuard } from './common/guards/throttle.guard';
     EventModule,
     EventRegistrationModule,
     EventAttendanceModule,
+    MemberPointModule,
   ],
   controllers: [AppController],
   providers: [
