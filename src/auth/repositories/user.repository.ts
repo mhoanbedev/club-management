@@ -33,4 +33,9 @@ export class UserRepository extends Repository<UserEntity> {
   async findByRole(role: 'admin' | 'user' | 'club_leader'): Promise<UserEntity[]> {
     return this.find({ where: { role } });
   }
+
+  async updateAvatar(userId: string, avatarUrl: string): Promise<UserEntity | null> {
+    await this.update(userId, { avatarUrl });
+    return this.findById(userId);
+  }
 }

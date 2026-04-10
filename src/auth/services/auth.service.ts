@@ -148,6 +148,10 @@ export class AuthService {
     await this.refreshTokenRepository.revokeToken(refreshToken);
   }
 
+  async updateUserAvatar(userId: string, avatarUrl: string): Promise<any> {
+    return this.userRepository.updateAvatar(userId, avatarUrl);
+  }
+
   async validateUser(id: string): Promise<any> {
     return this.userRepository.findById(id);
   }

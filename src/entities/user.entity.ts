@@ -24,6 +24,9 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isEmailVerified: boolean;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatarUrl: string;
+
   @OneToMany('RefreshTokenEntity', 'user', { cascade: true })
   refreshTokens: any[];
 

@@ -16,6 +16,9 @@ export class UserResponseDto {
   @ApiProperty()
   isActive: boolean;
 
+  @ApiProperty({ required: false })
+  avatarUrl?: string;
+
   @ApiProperty()
   createdAt: Date;
 }

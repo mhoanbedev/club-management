@@ -1,5 +1,6 @@
-import { Controller, Post, Body, UseGuards, Get, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Get, Request, Patch, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
@@ -10,11 +11,15 @@ import { CreateClubLeaderDto } from '../dto/create-club-leader.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { AdminGuard } from '../guards/admin.guard';
+import { UploadService } from '../../upload/upload.service';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private uploadService: UploadService,
+  ) {}
 
   @Post('register')
   @Throttle({ default: { limit: 3, ttl: 900000 } })
@@ -91,7 +96,50 @@ export class AuthController {
       name: user.name,
       role: user.role,
       isActive: user.isActive,
+      avatarUrl: user.avatarUrl,
       createdAt: user.createdAt,
+    };
+  }
+
+  @Patch('me/avatar')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          description: 'Ảnh đại diện (jpg, png, gif, webp, max 5MB)',
+        },
+      },
+      required: ['avatar'],
+    },
+  })
+  @ApiOperation({ summary: 'Cập nhật ảnh đại diện' })
+  @ApiResponse({ status: 200, description: 'Cập nhật ảnh thành công' })
+  async updateAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req,
+  ): Promise<{ success: boolean; data: UserResponseDto; message: string }> {
+    const avatarUrl = await this.uploadService.uploadFile(file, 'club-management/avatars');
+    const user = await this.authService.updateUserAvatar(req.user.id, avatarUrl);
+    return {
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isActive: user.isActive,
+        avatarUrl: user.avatarUrl,
+        createdAt: user.createdAt,
+      },
+      message: 'Cập nhật ảnh đại diện thành công',
     };
   }
 }

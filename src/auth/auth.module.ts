@@ -10,6 +10,7 @@ import { AuthController } from './controllers/auth.controller';
 import { UserRepository } from './repositories/user.repository';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         signOptions: { expiresIn: '5m' },
       }),
     }),
+    UploadModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserRepository, RefreshTokenRepository, JwtStrategy],
