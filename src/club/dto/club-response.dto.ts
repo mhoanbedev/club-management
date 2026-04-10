@@ -16,8 +16,11 @@ export class ClubResponseDto {
   @ApiProperty()
   status: 'pending' | 'active' | 'inactive';
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   imageUrl?: string;
+
+  @ApiProperty({ type: [String], required: false, nullable: true, description: 'Album ảnh kỉ niệm (tối đa 10 ảnh)' })
+  gallery?: string[];
 
   @ApiProperty()
   createdAt: Date;

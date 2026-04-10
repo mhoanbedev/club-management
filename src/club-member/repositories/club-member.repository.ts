@@ -110,18 +110,59 @@ export class ClubMemberRepository {
   }
 
   async findActiveByClubId(clubId: string): Promise<ClubMemberEntity[]> {
-    return this.repository.find({
-      where: { clubId, status: 'active' },
-      relations: ['user', 'club'],
-      order: { joinedAt: 'DESC' },
-    });
+    return this.repository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
+      .leftJoinAndSelect('member.club', 'club')
+      .where('member.clubId = :clubId', { clubId })
+      .andWhere('member.status = :status', { status: 'active' })
+      .select([
+        'member.id',
+        'member.userId',
+        'member.clubId',
+        'member.role',
+        'member.status',
+        'member.joinedAt',
+        'member.approvedAt',
+        'user.id',
+        'user.email',
+        'user.name',
+        'user.avatarUrl',
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.imageUrl',
+      ])
+      .orderBy('member.joinedAt', 'DESC')
+      .getMany();
   }
 
   async findByClubAndUserId(clubId: string, userId: string): Promise<ClubMemberEntity | null> {
-    return this.repository.findOne({
-      where: { clubId, userId },
-      relations: ['user', 'club'],
-    });
+    return this.repository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
+      .leftJoinAndSelect('member.club', 'club')
+      .where('member.clubId = :clubId', { clubId })
+      .andWhere('member.userId = :userId', { userId })
+      .select([
+        'member.id',
+        'member.userId',
+        'member.clubId',
+        'member.role',
+        'member.status',
+        'member.joinedAt',
+        'member.approvedAt',
+        'member.rejectedAt',
+        'user.id',
+        'user.email',
+        'user.name',
+        'user.avatarUrl',
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.imageUrl',
+      ])
+      .getOne();
   }
 
   async findByIdWithUser(id: string, queryRunner?: any): Promise<ClubMemberEntity | null> {
@@ -145,9 +186,27 @@ export class ClubMemberRepository {
   ): Promise<[ClubMemberEntity[], number]> {
     const query = this.repository
       .createQueryBuilder('member')
-      .where('member.clubId = :clubId', { clubId })
       .leftJoinAndSelect('member.user', 'user')
       .leftJoinAndSelect('member.club', 'club')
+      .where('member.clubId = :clubId', { clubId })
+      .select([
+        'member.id',
+        'member.userId',
+        'member.clubId',
+        'member.role',
+        'member.status',
+        'member.joinedAt',
+        'member.approvedAt',
+        'member.rejectedAt',
+        'user.id',
+        'user.email',
+        'user.name',
+        'user.avatarUrl',
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.imageUrl',
+      ])
       .orderBy('member.joinedAt', 'DESC');
 
     if (status) {

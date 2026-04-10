@@ -168,4 +168,69 @@ export class ClubService {
       await queryRunner.release();
     }
   }
+
+  async addGalleryImagesBatch(id: string, imageUrls: string[], userId: string): Promise<ClubEntity> {
+    const club = await this.getClubById(id);
+    if (club.leaderId !== userId) {
+      throw new ForbiddenException('Chỉ chủ câu lạc bộ mới có quyền thêm ảnh vào album');
+    }
+
+    const gallery = club.gallery || [];
+    const totalImages = gallery.length + imageUrls.length;
+    
+    if (totalImages > 10) {
+      throw new BadRequestException(`Album chỉ còn chỗ cho ${10 - gallery.length} ảnh, nhưng bạn đang cố thêm ${imageUrls.length} ảnh`);
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      gallery.push(...imageUrls);
+      const updatedClub = await this.clubRepository.updateGallery(id, gallery, queryRunner);
+      if (!updatedClub) {
+        throw new NotFoundException('Câu lạc bộ không tồn tại');
+      }
+      await queryRunner.commitTransaction();
+      return updatedClub;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeGalleryImage(id: string, imageUrl: string, userId: string): Promise<ClubEntity> {
+    const club = await this.getClubById(id);
+    if (club.leaderId !== userId) {
+      throw new ForbiddenException('Chỉ chủ câu lạc bộ mới có quyền xóa ảnh khỏi album');
+    }
+
+    const gallery = club.gallery || [];
+    const index = gallery.indexOf(imageUrl);
+    if (index === -1) {
+      throw new NotFoundException('Ảnh không tồn tại trong album');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      gallery.splice(index, 1);
+      const updatedClub = await this.clubRepository.updateGallery(id, gallery, queryRunner);
+      if (!updatedClub) {
+        throw new NotFoundException('Câu lạc bộ không tồn tại');
+      }
+      await queryRunner.commitTransaction();
+      return updatedClub;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

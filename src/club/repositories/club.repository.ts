@@ -59,6 +59,7 @@ export class ClubRepository {
         'club.leaderId',
         'club.status',
         'club.imageUrl',
+        'club.gallery',
         'club.createdAt',
         'club.updatedAt',
         'leader.id',
@@ -79,14 +80,50 @@ export class ClubRepository {
   }
 
   async findAll(): Promise<ClubEntity[]> {
-    return this.repository.find({ order: { createdAt: 'DESC' } });
+    return this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.gallery',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ])
+      .orderBy('club.createdAt', 'DESC')
+      .getMany();
   }
 
   async findActiveClubs(): Promise<ClubEntity[]> {
-    return this.repository.find({
-      where: { status: 'active' },
-      order: { createdAt: 'DESC' },
-    });
+    return this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.gallery',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ])
+      .where('club.status = :status', { status: 'active' })
+      .orderBy('club.createdAt', 'DESC')
+      .getMany();
   }
 
   async findByLeaderId(leaderId: string): Promise<ClubEntity[]> {
@@ -103,7 +140,24 @@ export class ClubRepository {
   }
 
   async findAllWithFilter(status?: 'pending' | 'active' | 'inactive'): Promise<ClubEntity[]> {
-    const query = this.repository.createQueryBuilder('club');
+    const query = this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.gallery',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ]);
     
     if (status) {
       query.where('club.status = :status', { status });
@@ -113,7 +167,24 @@ export class ClubRepository {
   }
 
   async findByLeaderIdWithFilter(leaderId: string, status?: 'pending' | 'active' | 'inactive'): Promise<ClubEntity[]> {
-    const query = this.repository.createQueryBuilder('club')
+    const query = this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.gallery',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ])
       .where('club.leaderId = :leaderId', { leaderId });
     
     if (status) {
@@ -160,6 +231,15 @@ export class ClubRepository {
       await queryRunner.manager.update(ClubEntity, id, { imageUrl });
     } else {
       await this.repository.update(id, { imageUrl });
+    }
+    return this.findById(id);
+  }
+
+  async updateGallery(id: string, gallery: string[], queryRunner?: any): Promise<ClubEntity | null> {
+    if (queryRunner) {
+      await queryRunner.manager.update(ClubEntity, id, { gallery });
+    } else {
+      await this.repository.update(id, { gallery });
     }
     return this.findById(id);
   }

@@ -27,6 +27,9 @@ export class ClubEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   imageUrl: string;
 
+  @Column({ type: 'simple-array', nullable: true, default: () => "''" })
+  gallery: string[];
+
   @CreateDateColumn()
   createdAt: Date;
 

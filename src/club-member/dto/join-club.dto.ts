@@ -38,6 +38,9 @@ export class UserBasicDto {
 
   @ApiProperty()
   name: string;
+
+  @ApiProperty({ nullable: true })
+  avatarUrl: string | null;
 }
 
 export class ClubBasicDto {
@@ -49,6 +52,9 @@ export class ClubBasicDto {
 
   @ApiProperty()
   description: string;
+
+  @ApiProperty({ nullable: true })
+  imageUrl: string | null;
 }
 
 export class ClubMemberListDto {
