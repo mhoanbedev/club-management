@@ -14,6 +14,7 @@ export class AttendanceResponseDto {
     id: string;
     email: string;
     name: string;
+    avatarUrl: string | null;
   };
   event: {
     id: string;
@@ -21,6 +22,7 @@ export class AttendanceResponseDto {
     startTime: Date;
     endTime: Date;
     location: string;
+    imageUrl: string | null;
     type: {
       id: string;
       name: string;

@@ -399,6 +399,7 @@ export class EventAttendanceService {
         id: attendance.user?.id,
         email: attendance.user?.email,
         name: attendance.user?.name,
+        avatarUrl: attendance.user?.avatarUrl || null,
       },
       event: {
         id: attendance.event?.id,
@@ -406,6 +407,7 @@ export class EventAttendanceService {
         startTime: attendance.event?.startTime,
         endTime: attendance.event?.endTime,
         location: attendance.event?.location,
+        imageUrl: attendance.event?.imageUrl || null,
         type: attendance.event?.type ? {
           id: attendance.event.type.id,
           name: attendance.event.type.name,
