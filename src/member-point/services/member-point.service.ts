@@ -186,6 +186,7 @@ export class MemberPointService {
       userId: memberPoint.user.id,
       userName: memberPoint.user.name,
       email: memberPoint.user.email,
+      avatarUrl: memberPoint.user.avatarUrl || null,
       totalPoints: memberPoint.totalPoints,
       rank,
     };
@@ -201,6 +202,7 @@ export class MemberPointService {
     const data: MemberPointDto[] = memberPoints.map((mp, index) => ({
       userId: mp.userId,
       userName: mp.userName,
+      avatarUrl: mp.avatarUrl || null,
       totalPoints: parseInt(mp.totalPoints) || 0,
       rank: skip + index + 1,
     }));
@@ -225,6 +227,10 @@ export class MemberPointService {
       id: h.id,
       eventId: h.eventId,
       eventName: h.event?.name || 'N/A',
+      eventStartTime: h.event?.startTime,
+      eventEndTime: h.event?.endTime,
+      eventLocation: h.event?.location || 'N/A',
+      eventImageUrl: h.event?.imageUrl || null,
       pointsEarned: h.pointsEarned,
       reason: h.reason,
       createdAt: h.createdAt,

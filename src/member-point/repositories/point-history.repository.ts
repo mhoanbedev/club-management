@@ -16,6 +16,21 @@ export class PointHistoryRepository extends Repository<PointHistoryEntity> {
   ): Promise<[PointHistoryEntity[], number]> {
     return this.createQueryBuilder('history')
       .leftJoinAndSelect('history.event', 'event')
+      .select([
+        'history.id',
+        'history.clubId',
+        'history.userId',
+        'history.eventId',
+        'history.pointsEarned',
+        'history.reason',
+        'history.createdAt',
+        'event.id',
+        'event.name',
+        'event.startTime',
+        'event.endTime',
+        'event.location',
+        'event.imageUrl',
+      ])
       .where('history.clubId = :clubId', { clubId })
       .andWhere('history.userId = :userId', { userId })
       .orderBy('history.createdAt', 'DESC')

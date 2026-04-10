@@ -14,6 +14,18 @@ export class MemberPointRepository extends Repository<MemberPointEntity> {
   ): Promise<MemberPointEntity | null> {
     return this.createQueryBuilder('point')
       .leftJoinAndSelect('point.user', 'user')
+      .select([
+        'point.id',
+        'point.clubId',
+        'point.userId',
+        'point.totalPoints',
+        'point.createdAt',
+        'point.updatedAt',
+        'user.id',
+        'user.name',
+        'user.email',
+        'user.avatarUrl',
+      ])
       .where('point.clubId = :clubId', { clubId })
       .andWhere('point.userId = :userId', { userId })
       .getOne();
@@ -29,6 +41,7 @@ export class MemberPointRepository extends Repository<MemberPointEntity> {
       .select('cm.userId', 'userId')
       .addSelect('u.name', 'userName')
       .addSelect('u.email', 'email')
+      .addSelect('u."avatarUrl"', 'avatarUrl')
       .addSelect('COALESCE(mp."totalPoints", 0)::integer', 'totalPoints')
       .from('club_members', 'cm')
       .leftJoin('member_points', 'mp', 'mp.userId = cm.userId AND mp.clubId = :clubId', { clubId })
