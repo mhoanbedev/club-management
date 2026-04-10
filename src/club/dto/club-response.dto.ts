@@ -16,6 +16,9 @@ export class ClubResponseDto {
   @ApiProperty()
   status: 'pending' | 'active' | 'inactive';
 
+  @ApiProperty({ required: false })
+  imageUrl?: string;
+
   @ApiProperty()
   createdAt: Date;
 

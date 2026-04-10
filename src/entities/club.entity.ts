@@ -24,6 +24,9 @@ export class ClubEntity {
   @Column({ type: 'enum', enum: ['pending', 'active', 'inactive'], default: 'pending' })
   status: 'pending' | 'active' | 'inactive';
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  imageUrl: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

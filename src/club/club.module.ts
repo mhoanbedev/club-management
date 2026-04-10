@@ -5,9 +5,10 @@ import { ClubController } from './controllers/club.controller';
 import { ClubService } from './services/club.service';
 import { ClubRepository } from './repositories/club.repository';
 import { ClubMemberModule } from '../club-member/club-member.module';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClubEntity]), ClubMemberModule],
+  imports: [TypeOrmModule.forFeature([ClubEntity]), ClubMemberModule, UploadModule],
   controllers: [ClubController],
   providers: [ClubService, ClubRepository],
   exports: [ClubService, ClubRepository],

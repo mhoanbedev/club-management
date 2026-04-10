@@ -15,20 +15,15 @@ export class ClubService {
 
   async createClub(createClubDto: CreateClubDto, leaderId: string): Promise<ClubEntity> {
     const { name, description = '' } = createClubDto;
-
-    // Check if club name already exists (case-insensitive)
     const existingClub = await this.clubRepository.findByName(name);
     if (existingClub) {
       throw new BadRequestException('Tên câu lạc bộ đã tồn tại');
     }
-
-    // Check if leader already has a pending club
     const pendingClub = await this.clubRepository.findPendingClubByLeaderId(leaderId);
     if (pendingClub) {
       throw new BadRequestException('Bạn đã có một câu lạc bộ đang chờ duyệt, vui lòng chờ kết quả trước khi tạo câu lạc bộ mới');
     }
 
-    // Use transaction for critical operation
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -79,23 +74,17 @@ export class ClubService {
 
   async updateClub(id: string, updateClubDto: UpdateClubDto, userId: string): Promise<ClubEntity> {
     const club = await this.getClubById(id);
-
-    // Check if user is club leader or owner
     if (club.leaderId !== userId) {
       throw new ForbiddenException('Chỉ chủ câu lạc bộ mới có quyền cập nhật');
     }
 
     const { name, description } = updateClubDto;
-
-    // Check if new name already exists (if name is being updated, case-insensitive)
     if (name && name !== club.name) {
       const existingClub = await this.clubRepository.findByName(name);
       if (existingClub) {
         throw new BadRequestException('Tên câu lạc bộ đã tồn tại');
       }
     }
-
-    // Use transaction for critical operation
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -136,14 +125,37 @@ export class ClubService {
 
   async approveClub(id: string, approveClubDto: ApproveClubDto): Promise<ClubEntity> {
     await this.getClubById(id);
-
-    // Use transaction for critical operation
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       const updatedClub = await this.clubRepository.updateStatus(id, approveClubDto.status, queryRunner);
+      if (!updatedClub) {
+        throw new NotFoundException('Câu lạc bộ không tồn tại');
+      }
+      await queryRunner.commitTransaction();
+      return updatedClub;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateClubImage(id: string, imageUrl: string, userId: string): Promise<ClubEntity> {
+    const club = await this.getClubById(id);
+    if (club.leaderId !== userId) {
+      throw new ForbiddenException('Chỉ chủ câu lạc bộ mới có quyền cập nhật ảnh');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const updatedClub = await this.clubRepository.updateImage(id, imageUrl, queryRunner);
       if (!updatedClub) {
         throw new NotFoundException('Câu lạc bộ không tồn tại');
       }

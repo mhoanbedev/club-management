@@ -1,5 +1,6 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Request, HttpCode, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Request, HttpCode, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ClubService } from '../services/club.service';
 import { ClubMemberService } from '../../club-member/services/club-member.service';
@@ -10,6 +11,7 @@ import { ClubResponseDto } from '../dto/club-response.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { ClubLeaderGuard } from '../guards/club-leader.guard';
+import { UploadService } from '../../upload/upload.service';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -17,6 +19,7 @@ export class ClubController {
   constructor(
     private clubService: ClubService,
     private clubMemberService: ClubMemberService,
+    private uploadService: UploadService,
   ) {}
 
   @Post()
@@ -129,5 +132,43 @@ export class ClubController {
     }
     
     return approvedClub;
+  }
+
+  @Patch(':id/image')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Ảnh câu lạc bộ (jpg, png, gif, webp, max 5MB)',
+        },
+      },
+      required: ['image'],
+    },
+  })
+  @ApiOperation({ summary: 'Cập nhật ảnh câu lạc bộ (chủ câu lạc bộ only)' })
+  @ApiParam({ name: 'id', description: 'ID của câu lạc bộ' })
+  @ApiResponse({ status: 200, description: 'Cập nhật ảnh thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ chủ câu lạc bộ mới có quyền' })
+  @ApiResponse({ status: 404, description: 'Câu lạc bộ không tồn tại' })
+  async updateClubImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req,
+  ): Promise<{ success: boolean; data: ClubResponseDto; message: string }> {
+    const imageUrl = await this.uploadService.uploadFile(file, 'club-management/clubs');
+    const club = await this.clubService.updateClubImage(id, imageUrl, req.user.id);
+    return {
+      success: true,
+      data: club,
+      message: 'Cập nhật ảnh câu lạc bộ thành công',
+    };
   }
 }

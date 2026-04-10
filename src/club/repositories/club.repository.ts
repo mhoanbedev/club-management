@@ -49,7 +49,25 @@ export class ClubRepository {
 }
 
   async findById(id: string): Promise<ClubEntity | null> {
-    return this.repository.findOne({ where: { id } });
+    return this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ])
+      .where('club.id = :id', { id })
+      .getOne();
   }
 
   async findByName(name: string): Promise<ClubEntity | null> {
@@ -135,5 +153,14 @@ export class ClubRepository {
     } else {
       await this.repository.delete(id);
     }
+  }
+
+  async updateImage(id: string, imageUrl: string, queryRunner?: any): Promise<ClubEntity | null> {
+    if (queryRunner) {
+      await queryRunner.manager.update(ClubEntity, id, { imageUrl });
+    } else {
+      await this.repository.update(id, { imageUrl });
+    }
+    return this.findById(id);
   }
 }
