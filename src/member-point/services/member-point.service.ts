@@ -223,14 +223,16 @@ export class MemberPointService {
       take,
     );
 
-    const data: PointHistoryDto[] = histories.map((h) => ({
+    const data: PointHistoryDto[] = histories.map((h: any) => ({
       id: h.id,
       eventId: h.eventId,
-      eventName: h.event?.name || 'N/A',
-      eventStartTime: h.event?.startTime,
-      eventEndTime: h.event?.endTime,
-      eventLocation: h.event?.location || 'N/A',
-      eventImageUrl: h.event?.imageUrl || null,
+      eventName: h.eventName || 'N/A',
+      eventStartTime: h.eventStartTime,
+      eventEndTime: h.eventEndTime,
+      eventLocation: h.eventLocation || 'N/A',
+      eventImageUrl: h.eventImageUrl || null,
+      checkedInAt: h.checkedInAt || null,
+      checkedOutAt: h.checkedOutAt || null,
       pointsEarned: h.pointsEarned,
       reason: h.reason,
       createdAt: h.createdAt,
