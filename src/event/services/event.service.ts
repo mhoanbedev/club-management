@@ -283,6 +283,29 @@ export class EventService {
     await this.eventRepository.softDelete(eventId, userId);
   }
 
+  async updateEventImage(clubId: string, eventId: string, imageUrl: string, userId: string): Promise<any> {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) {
+      throw new NotFoundException('Câu lạc bộ không tồn tại');
+    }
+
+    const member = await this.clubMemberRepository.findByClubAndUser(clubId, userId);
+    if (!member || member.role !== 'leader') {
+      throw new ForbiddenException('Chỉ leader của câu lạc bộ mới có thể cập nhật ảnh sự kiện');
+    }
+
+    const event = await this.eventRepository.findById(eventId);
+    if (!event || event.clubId !== clubId) {
+      throw new NotFoundException('Sự kiện không tồn tại');
+    }
+
+    const updatedEvent = await this.eventRepository.update(eventId, { imageUrl });
+    if (!updatedEvent) {
+      throw new NotFoundException('Sự kiện không tồn tại');
+    }
+    return this.mapEventResponse(updatedEvent);
+  }
+
   private mapEventResponse(event: EventEntity): any {
     return {
       id: event.id,
@@ -297,6 +320,7 @@ export class EventService {
       startTime: event.startTime,
       endTime: event.endTime,
       location: event.location,
+      imageUrl: event.imageUrl,
       status: event.status,
       deletedAt: event.deletedAt,
       deletedBy: event.deletedByUser ? {

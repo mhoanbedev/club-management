@@ -29,6 +29,9 @@ export class EventEntity {
   @Column('varchar', { length: 255 })
   location: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  imageUrl: string;
+
   @Column('varchar', { length: 20, default: 'draft' })
   status: 'draft' | 'published' | 'ongoing' | 'finished';
 

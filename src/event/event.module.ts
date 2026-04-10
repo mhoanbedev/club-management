@@ -8,6 +8,7 @@ import { EventRepository } from './repositories/event.repository';
 import { ClubMemberModule } from '../club-member/club-member.module';
 import { ClubModule } from '../club/club.module';
 import { EventTypeModule } from '../event-type/event-type.module';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { EventTypeModule } from '../event-type/event-type.module';
     ClubMemberModule,
     ClubModule,
     EventTypeModule,
+    UploadModule,
   ],
   controllers: [EventController],
   providers: [EventService, EventCronService, EventRepository],

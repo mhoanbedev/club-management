@@ -33,10 +33,34 @@ export class EventRepository {
   }
 
   async findById(id: string): Promise<EventEntity | null> {
-    return this.repository.findOne({
-      where: { id },
-      relations: ['type', 'deletedByUser'],
-    });
+    return this.repository
+      .createQueryBuilder('event')
+      .select([
+        'event.id',
+        'event.clubId',
+        'event.typeId',
+        'event.name',
+        'event.description',
+        'event.startTime',
+        'event.endTime',
+        'event.location',
+        'event.imageUrl',
+        'event.status',
+        'event.deletedAt',
+        'event.deletedBy',
+        'event.createdAt',
+        'event.updatedAt',
+        'type.id',
+        'type.name',
+        'type.description',
+        'deletedByUser.id',
+        'deletedByUser.name',
+        'deletedByUser.email',
+      ])
+      .leftJoinAndSelect('event.type', 'type')
+      .leftJoinAndSelect('event.deletedByUser', 'deletedByUser')
+      .where('event.id = :id', { id })
+      .getOne();
   }
 
   async findByClubIdForMembers(
@@ -47,10 +71,27 @@ export class EventRepository {
   ): Promise<[EventEntity[], number]> {
     const query = this.repository
       .createQueryBuilder('event')
+      .select([
+        'event.id',
+        'event.clubId',
+        'event.typeId',
+        'event.name',
+        'event.description',
+        'event.startTime',
+        'event.endTime',
+        'event.location',
+        'event.imageUrl',
+        'event.status',
+        'event.createdAt',
+        'event.updatedAt',
+        'type.id',
+        'type.name',
+        'type.description',
+      ])
+      .leftJoinAndSelect('event.type', 'type')
       .where('event.clubId = :clubId', { clubId })
       .andWhere('event.deletedAt IS NULL')
       .andWhere('event.status IN (:...statuses)', { statuses: ['published', 'ongoing', 'finished'] })
-      .leftJoinAndSelect('event.type', 'type')
       .orderBy('event.startTime', 'ASC');
 
     if (status) {
@@ -69,9 +110,31 @@ export class EventRepository {
   ): Promise<[EventEntity[], number]> {
     const query = this.repository
       .createQueryBuilder('event')
-      .where('event.clubId = :clubId', { clubId })
+      .select([
+        'event.id',
+        'event.clubId',
+        'event.typeId',
+        'event.name',
+        'event.description',
+        'event.startTime',
+        'event.endTime',
+        'event.location',
+        'event.imageUrl',
+        'event.status',
+        'event.deletedAt',
+        'event.deletedBy',
+        'event.createdAt',
+        'event.updatedAt',
+        'type.id',
+        'type.name',
+        'type.description',
+        'deletedByUser.id',
+        'deletedByUser.name',
+        'deletedByUser.email',
+      ])
       .leftJoinAndSelect('event.type', 'type')
       .leftJoinAndSelect('event.deletedByUser', 'deletedByUser')
+      .where('event.clubId = :clubId', { clubId })
       .orderBy('event.startTime', 'ASC');
 
     if (!includeDeleted) {
@@ -88,12 +151,32 @@ export class EventRepository {
   async findByIdForMembers(clubId: string, id: string): Promise<EventEntity | null> {
     return this.repository
       .createQueryBuilder('event')
+      .select([
+        'event.id',
+        'event.clubId',
+        'event.typeId',
+        'event.name',
+        'event.description',
+        'event.startTime',
+        'event.endTime',
+        'event.location',
+        'event.imageUrl',
+        'event.status',
+        'event.createdAt',
+        'event.updatedAt',
+        'type.id',
+        'type.name',
+        'type.description',
+        'deletedByUser.id',
+        'deletedByUser.name',
+        'deletedByUser.email',
+      ])
+      .leftJoinAndSelect('event.type', 'type')
+      .leftJoinAndSelect('event.deletedByUser', 'deletedByUser')
       .where('event.id = :id', { id })
       .andWhere('event.clubId = :clubId', { clubId })
       .andWhere('event.deletedAt IS NULL')
       .andWhere('event.status IN (:...statuses)', { statuses: ['published', 'ongoing', 'finished'] })
-      .leftJoinAndSelect('event.type', 'type')
-      .leftJoinAndSelect('event.deletedByUser', 'deletedByUser')
       .getOne();
   }
 

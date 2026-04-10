@@ -47,6 +47,9 @@ export class EventResponseDto {
   @ApiProperty()
   location: string;
 
+  @ApiProperty({ nullable: true })
+  imageUrl: string;
+
   @ApiProperty()
   status: 'draft' | 'published' | 'ongoing' | 'finished';
 

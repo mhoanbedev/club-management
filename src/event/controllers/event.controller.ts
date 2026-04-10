@@ -10,20 +10,27 @@ import {
   UseGuards,
   Request,
   HttpCode,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { EventService } from '../services/event.service';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { EventResponseDto } from '../dto/event-response.dto';
+import { UploadService } from '../../upload/upload.service';
 
 @ApiTags('Events')
 @Controller('clubs/:clubId/events')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class EventController {
-  constructor(private eventService: EventService) {}
+  constructor(
+    private eventService: EventService,
+    private uploadService: UploadService,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -110,6 +117,39 @@ export class EventController {
     @Request() req: any,
   ) {
     return this.eventService.updateEvent(clubId, id, updateEventDto, req.user.id);
+  }
+
+  @Patch(':id/image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Ảnh sự kiện (jpg, png, gif, webp, max 5MB)',
+        },
+      },
+      required: ['image'],
+    },
+  })
+  @ApiOperation({ summary: 'Cập nhật ảnh sự kiện (chỉ leader)' })
+  @ApiResponse({ status: 200, description: 'Cập nhật ảnh thành công' })
+  async updateEventImage(
+    @Param('clubId') clubId: string,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req: any,
+  ): Promise<{ success: boolean; data: EventResponseDto; message: string }> {
+    const imageUrl = await this.uploadService.uploadFile(file, 'club-management/events');
+    const event = await this.eventService.updateEventImage(clubId, id, imageUrl, req.user.id);
+    return {
+      success: true,
+      data: event,
+      message: 'Cập nhật ảnh sự kiện thành công',
+    };
   }
 
   @Delete(':id')
