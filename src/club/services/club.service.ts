@@ -64,8 +64,14 @@ export class ClubService {
     return this.clubRepository.findActiveClubs();
   }
 
-  async getAllClubsForAdmin(status?: 'pending' | 'active' | 'inactive'): Promise<ClubEntity[]> {
-    return this.clubRepository.findAllWithFilter(status);
+  async getAllClubsForAdmin(status?: 'pending' | 'active' | 'inactive', skip: number = 0, take: number = 10): Promise<any> {
+    const [clubs, total] = await this.clubRepository.findAllWithFilterAndPagination(status, skip, take);
+    return {
+      data: clubs,
+      total,
+      skip,
+      take,
+    };
   }
 
   async getMyClubs(leaderId: string, status?: 'pending' | 'active' | 'inactive'): Promise<ClubEntity[]> {

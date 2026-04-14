@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Request, HttpCode, Query, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ClubService } from '../services/club.service';
 import { ClubMemberService } from '../../club-member/services/club-member.service';
@@ -47,13 +47,20 @@ export class ClubController {
   @SkipThrottle()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Lấy tất cả câu lạc bộ (admin only, có filter)' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công', type: [ClubResponseDto] })
+  @ApiOperation({ summary: 'Lấy tất cả câu lạc bộ (admin only, có filter và phân trang)' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ admin mới có quyền' })
+  @ApiQuery({ name: 'status', enum: ['pending', 'active', 'inactive'], required: false, description: 'Lọc theo trạng thái' })
+  @ApiQuery({ name: 'skip', type: Number, required: false, description: 'Số bản ghi bỏ qua (mặc định: 0)' })
+  @ApiQuery({ name: 'take', type: Number, required: false, description: 'Số bản ghi lấy (mặc định: 10)' })
   async getAllClubsForAdmin(
     @Query('status') status?: 'pending' | 'active' | 'inactive',
-  ): Promise<ClubResponseDto[]> {
-    return this.clubService.getAllClubsForAdmin(status);
+    @Query('skip') skip: string = '0',
+    @Query('take') take: string = '10',
+  ): Promise<any> {
+    const skipNum = parseInt(skip, 10) || 0;
+    const takeNum = parseInt(take, 10) || 10;
+    return this.clubService.getAllClubsForAdmin(status, skipNum, takeNum);
   }
 
   @Get('my-clubs')

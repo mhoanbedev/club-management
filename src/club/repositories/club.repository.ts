@@ -166,6 +166,37 @@ export class ClubRepository {
     return query.orderBy('club.createdAt', 'DESC').getMany();
   }
 
+  async findAllWithFilterAndPagination(status?: 'pending' | 'active' | 'inactive', skip: number = 0, take: number = 10): Promise<[ClubEntity[], number]> {
+    const query = this.repository
+      .createQueryBuilder('club')
+      .leftJoinAndSelect('club.leader', 'leader')
+      .select([
+        'club.id',
+        'club.name',
+        'club.description',
+        'club.leaderId',
+        'club.status',
+        'club.imageUrl',
+        'club.gallery',
+        'club.createdAt',
+        'club.updatedAt',
+        'leader.id',
+        'leader.name',
+        'leader.email',
+        'leader.avatarUrl',
+      ]);
+    
+    if (status) {
+      query.where('club.status = :status', { status });
+    }
+    
+    return query
+      .orderBy('club.createdAt', 'DESC')
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+  }
+
   async findByLeaderIdWithFilter(leaderId: string, status?: 'pending' | 'active' | 'inactive'): Promise<ClubEntity[]> {
     const query = this.repository
       .createQueryBuilder('club')
