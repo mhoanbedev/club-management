@@ -22,7 +22,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @Throttle({ default: { limit: 3, ttl: 900000 } })
+  @Throttle({ default: { limit: 10000, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng ký tài khoản sinh viên' })
   @ApiResponse({ status: 201, description: 'Đăng ký thành công' })
   @ApiResponse({ status: 400, description: 'Email đã được đăng ký' })
@@ -32,7 +32,7 @@ export class AuthController {
   }
 
   @Post('register-admin')
-  @Throttle({ default: { limit: 3, ttl: 900000 } })
+  @Throttle({ default: { limit: 10000, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng ký tài khoản admin (chỉ lần đầu)' })
   @ApiResponse({ status: 201, description: 'Đăng ký admin thành công' })
   @ApiResponse({ status: 400, description: 'Email đã được đăng ký' })
@@ -53,7 +53,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { limit: 3, ttl: 300000 } })
+  @Throttle({ default: { limit: 10000, ttl: 300000 } })
   @ApiOperation({ summary: 'Đăng nhập' })
   @ApiResponse({ status: 200, description: 'Đăng nhập thành công', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Thông tin đăng nhập không hợp lệ' })
