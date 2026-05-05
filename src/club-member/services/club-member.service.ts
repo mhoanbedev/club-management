@@ -286,6 +286,52 @@ export class ClubMemberService {
     }
   }
 
+  async getMembersForManagement(
+    clubId: string,
+    leaderId: string,
+    status?: 'pending' | 'active' | 'rejected' | 'inactive',
+    skip: number = 0,
+    take: number = 10,
+  ): Promise<any> {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) {
+      throw new NotFoundException('Câu lạc bộ không tồn tại');
+    }
+    const leaderMember = await this.clubMemberRepository.findActiveByClubAndUser(clubId, leaderId);
+    if (!leaderMember || leaderMember.role !== 'leader') {
+      throw new ForbiddenException('Chỉ chủ câu lạc bộ mới có quyền quản lý thành viên');
+    }
+    const [members, total] = await this.clubMemberRepository.findAllByClubWithFilter(
+      clubId,
+      status,
+      skip,
+      take,
+    );
+
+    const data = members.map(member => ({
+      id: member.id,
+      userId: member.userId,
+      user: {
+        id: member.user.id,
+        email: member.user.email,
+        name: member.user.name,
+        avatarUrl: member.user.avatarUrl,
+      },
+      role: member.role,
+      status: member.status,
+      joinedAt: member.joinedAt,
+      approvedAt: member.approvedAt,
+      rejectedAt: member.rejectedAt,
+    }));
+
+    return {
+      data,
+      total,
+      skip,
+      take,
+    };
+  }
+
   async getAllMembersForAdmin(
     clubId: string,
     status?: 'pending' | 'active' | 'rejected' | 'inactive',

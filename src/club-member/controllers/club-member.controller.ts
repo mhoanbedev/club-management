@@ -47,6 +47,34 @@ export class ClubMemberController {
     return this.clubMemberService.approveMemberJoin(clubId, memberId, req.user.id, approveJoinDto);
   }
 
+  @Get('manage')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Quản lý thành viên - xem tất cả trạng thái (leader only)' })
+  @ApiParam({ name: 'clubId', description: 'ID của câu lạc bộ' })
+  @ApiQuery({ name: 'status', enum: ['pending', 'active', 'rejected', 'inactive'], required: false, description: 'Lọc theo trạng thái' })
+  @ApiQuery({ name: 'skip', type: Number, required: false, description: 'Số bản ghi bỏ qua (default: 0)' })
+  @ApiQuery({ name: 'take', type: Number, required: false, description: 'Số bản ghi lấy (default: 10)' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ leader mới có quyền' })
+  @ApiResponse({ status: 404, description: 'Câu lạc bộ không tồn tại' })
+  async getMembersForManagement(
+    @Param('clubId') clubId: string,
+    @Request() req,
+    @Query('status') status?: 'pending' | 'active' | 'rejected' | 'inactive',
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ): Promise<any> {
+    return this.clubMemberService.getMembersForManagement(
+      clubId,
+      req.user.id,
+      status,
+      skip ? parseInt(skip, 10) : 0,
+      take ? parseInt(take, 10) : 10,
+    );
+  }
+
   @Get()
   @SkipThrottle()
   @UseGuards(JwtAuthGuard)
