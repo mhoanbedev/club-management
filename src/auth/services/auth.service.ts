@@ -148,6 +148,20 @@ export class AuthService {
     await this.refreshTokenRepository.revokeToken(refreshToken);
   }
 
+  async getClubLeaders(): Promise<any[]> {
+    const clubLeaders = await this.userRepository.findByRole('club_leader');
+    
+    return clubLeaders.map(user => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      isActive: user.isActive,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+    }));
+  }
+
   async updateUserAvatar(userId: string, avatarUrl: string): Promise<any> {
     return this.userRepository.updateAvatar(userId, avatarUrl);
   }

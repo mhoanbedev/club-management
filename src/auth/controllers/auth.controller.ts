@@ -101,6 +101,17 @@ export class AuthController {
     };
   }
 
+  @Get('admin/club-leaders')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy danh sách tất cả club leader (admin only)' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ admin mới có quyền' })
+  async getClubLeaders(): Promise<any[]> {
+    return this.authService.getClubLeaders();
+  }
+
   @Patch('me/avatar')
   @SkipThrottle()
   @UseGuards(JwtAuthGuard)
